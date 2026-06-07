@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Receipt, Plus, Calendar, CreditCard, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
+import { Receipt, Plus, Calendar, CreditCard, Loader2, AlertCircle } from 'lucide-react';
 import Layout from '../components/Layout';
 import { dataService } from '../services/api';
 import type { Category } from '../schema';
@@ -48,22 +48,18 @@ const ExpensesPage = () => {
         payment_method: formData.payment_method
       });
 
-      if (res.success) {
-        setMessage({ type: 'success', text: 'Expense added successfully!' });
-        setBudgetInfo({
-          spent: res.category_spent,
-          limit: res.category_budget,
-          remaining: res.remaining_budget,
-          percentage: res.percentage_used
-        });
-        setFormData({ ...formData, amount: '' });
-        // Update global balance in localStorage
-        localStorage.setItem('sw_balance', res.balance.toString());
-      } else {
-        setMessage({ type: 'error', text: res.error || 'Failed to add expense' });
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Connection error' });
+      setMessage({ type: 'success', text: 'Expense added successfully!' });
+      setBudgetInfo({
+        spent: res.category_spent,
+        limit: res.category_budget,
+        remaining: res.remaining_budget,
+        percentage: res.percentage_used
+      });
+      setFormData({ ...formData, amount: '' });
+      // Update global balance in localStorage
+      localStorage.setItem('sw_balance', res.balance.toString());
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error?.message || 'Connection error' });
     } finally {
       setSubmitLoading(false);
     }

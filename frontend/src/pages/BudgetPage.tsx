@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Tags, Plus, Search, Loader2, AlertCircle, TrendingUp, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Tags, Plus, Search, Loader2, AlertCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { dataService } from '../services/api';
 import type { Budget } from '../schema';

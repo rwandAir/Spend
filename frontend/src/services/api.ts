@@ -1,68 +1,393 @@
-import axios from 'axios';
-import type { DashboardData, Expense, Income, Transaction, Budget, ReportData, Category } from '../schema';
+/**
+ * Django Backend API Service
+ * 
+ * This service provides all API calls to the Django backend
+ * Base URL: http://localhost:8000/api (proxied through Vite)
+ */
 
-const API_BASE_URL = 'http://localhost/spend_wisely/api/';
+const API_BASE_URL = '/api';
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true, // Required for PHP sessions
-});
+interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+interface ExpenseRequest {
+  category: string;
+  amount: number;
+  description?: string;
+  date: string;
+}
+
+interface IncomeRequest {
+  amount: number;
+  source: string;
+  date: string;
+}
+
+interface CategoryRequest {
+  name: string;
+  budget_limit?: number;
+}
+
+// ============================================================================
+// AUTHENTICATION SERVICE
+// ============================================================================
 
 export const authService = {
-  login: async (email: string, password: string) => {
-    const response = await api.post('auth.php', { action: 'login', email, password });
-    return response.data;
+  /**
+   * Login with email and password
+   */
+  async login(email: string, password: string) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include cookies for session
+        body: JSON.stringify({ email, password } as LoginRequest),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Login failed');
+      }
+
+      const data = await response.json();
+      
+      // Store user info in localStorage
+      if (data.user) {
+        localStorage.setItem('sw_user_id', data.user.id);
+        localStorage.setItem('sw_user_name', data.user.name);
+        localStorage.setItem('sw_user_role', data.user.role);
+        localStorage.setItem('sw_balance', data.user.balance || '0');
+      }
+
+      return { success: true, ...data };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, error: (error as Error).message };
+    }
   },
-  register: async (name: string, email: string, password: string) => {
-    const response = await api.post('auth.php', { action: 'register', name, email, password });
-    return response.data;
+  
+  /**
+   * Register new user
+   */
+  async register(name: string, email: string, password: string) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ name, email, password } as RegisterRequest),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Registration failed');
+      }
+
+      const data = await response.json();
+
+      // Store user info in localStorage
+      if (data.user) {
+        localStorage.setItem('sw_user_id', data.user.id);
+        localStorage.setItem('sw_user_name', data.user.name);
+        localStorage.setItem('sw_user_role', data.user.role);
+        localStorage.setItem('sw_balance', data.user.balance || '0');
+      }
+
+      return { success: true, ...data };
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: (error as Error).message };
+    }
   },
-  logout: async () => {
-    const response = await api.post('auth.php', { action: 'logout' });
-    return response.data;
-  }
+
+  /**
+   * Logout user
+   */
+  async logout() {
+    try {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      // Clear localStorage
+      localStorage.removeItem('sw_user_id');
+      localStorage.removeItem('sw_user_name');
+      localStorage.removeItem('sw_user_role');
+      localStorage.removeItem('sw_balance');
+      return { success: true };
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Clear localStorage even if logout fails
+      localStorage.removeItem('sw_user_id');
+      localStorage.removeItem('sw_user_name');
+      localStorage.removeItem('sw_user_role');
+      localStorage.removeItem('sw_balance');
+      return { success: true };
+    }
+  },
+
+  /**
+   * Check if user is authenticated
+   */
+  async isAuthenticated(): Promise<boolean> {
+    try {
+      const userId = localStorage.getItem('sw_user_id');
+      return !!userId;
+    } catch {
+      return false;
+    }
+  },
 };
+
+// ============================================================================
+// DATA SERVICE
+// ============================================================================
 
 export const dataService = {
-  getDashboard: async (): Promise<DashboardData> => {
-    const response = await api.get('get_dashboard.php');
-    return response.data;
+  /**
+   * Get dashboard summary data
+   */
+  async getDashboard() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/dashboard`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch dashboard');
+
+      return await response.json();
+    } catch (error) {
+      console.error('Dashboard error:', error);
+      throw error;
+    }
   },
-  addExpense: async (data: Partial<Expense>) => {
-    const response = await api.post('add_expenses.php', data);
-    return response.data;
+
+  /**
+   * Get all expenses
+   */
+  async getExpenses() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/expenses`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch expenses');
+
+      return await response.json();
+    } catch (error) {
+      console.error('Expenses error:', error);
+      throw error;
+    }
   },
-  getExpenses: async (): Promise<Expense[]> => {
-    const response = await api.get('get_expenses.php');
-    return response.data;
+
+  /**
+   * Add new expense
+   */
+  async addExpense(data: ExpenseRequest) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/expenses/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to add expense');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Add expense error:', error);
+      throw error;
+    }
   },
-  addIncome: async (data: Partial<Income>) => {
-    const response = await api.post('add_income.php', data);
-    return response.data;
+
+  /**
+   * Get all transactions
+   */
+  async getTransactions() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/transactions`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch transactions');
+
+      return await response.json();
+    } catch (error) {
+      console.error('Transactions error:', error);
+      throw error;
+    }
   },
-  getTransactions: async (): Promise<Transaction[]> => {
-    const response = await api.get('get_transactions.php');
-    return response.data;
+
+  /**
+   * Add income
+   */
+  async addIncome(data: IncomeRequest) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/income/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to add income');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Add income error:', error);
+      throw error;
+    }
   },
-  getCategories: async (): Promise<Category[]> => {
-    const response = await api.get('get_categories.php');
-    return response.data;
+
+  /**
+   * Get all categories
+   */
+  async getCategories() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/categories`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch categories');
+
+      return await response.json();
+    } catch (error) {
+      console.error('Categories error:', error);
+      throw error;
+    }
   },
-  getBudgetData: async (): Promise<Budget[]> => {
-    const response = await api.get('get_budget_data.php');
-    return response.data;
+
+  /**
+   * Get available categories
+   */
+  async getAvailableCategories() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/categories/available`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch available categories');
+
+      return await response.json();
+    } catch (error) {
+      console.error('Available categories error:', error);
+      throw error;
+    }
   },
-  addCategory: async (name: string, budgetLimit: number) => {
-    const response = await api.post('add_category.php', { name, budget_limit: budgetLimit });
-    return response.data;
+
+  /**
+   * Add new category
+   */
+  async addCategory(data: CategoryRequest) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/categories/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to add category');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Add category error:', error);
+      throw error;
+    }
   },
-  getReportData: async (month?: string): Promise<ReportData> => {
-    const response = await api.get('get_report.php', { params: { month } });
-    return response.data;
-  }
+
+  /**
+   * Delete category
+   */
+  async deleteCategory(categoryId: string) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/categories/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ category_id: categoryId }),
+      });
+
+      if (!response.ok) throw new Error('Failed to delete category');
+
+      return await response.json();
+    } catch (error) {
+      console.error('Delete category error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get budget data
+   */
+  async getBudgetData() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/budgets`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch budget data');
+
+      return await response.json();
+    } catch (error) {
+      console.error('Budget data error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get report data
+   */
+  async getReportData(month?: string) {
+    try {
+      const url = month 
+        ? `${API_BASE_URL}/reports?month=${month}`
+        : `${API_BASE_URL}/reports`;
+
+      const response = await fetch(url, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch report data');
+
+      return await response.json();
+    } catch (error) {
+      console.error('Report data error:', error);
+      throw error;
+    }
+  },
 };
 
-export default api;
+export default dataService;

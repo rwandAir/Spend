@@ -27,10 +27,10 @@ const AuthPage = () => {
     try {
       const data = await authService.login(loginData.email, loginData.password);
       if (data.success) {
-        localStorage.setItem('sw_user_id', data.user_id);
-        localStorage.setItem('sw_user_name', data.name);
-        localStorage.setItem('sw_user_role', data.role);
-        localStorage.setItem('sw_balance', data.balance);
+        localStorage.setItem('sw_user_id', String(data.user_id));
+        localStorage.setItem('sw_user_name', String(data.name));
+        localStorage.setItem('sw_user_role', String(data.role));
+        localStorage.setItem('sw_balance', String(data.balance ?? 0));
         setSuccess(`Welcome back, ${data.name}! Redirecting...`);
         setTimeout(() => navigate('/dashboard'), 1000);
       } else {
@@ -50,10 +50,10 @@ const AuthPage = () => {
     try {
       const data = await authService.register(regData.name, regData.email, regData.password);
       if (data.success) {
-        localStorage.setItem('sw_user_id', data.user_id);
-        localStorage.setItem('sw_user_name', data.name);
-        localStorage.setItem('sw_user_role', data.role);
-        localStorage.setItem('sw_balance', data.balance);
+        localStorage.setItem('sw_user_id', String(data.user_id));
+        localStorage.setItem('sw_user_name', String(data.name));
+        localStorage.setItem('sw_user_role', String(data.role));
+        localStorage.setItem('sw_balance', String(data.balance ?? 0));
         setSuccess('Account created! Welcome!');
         setTimeout(() => navigate('/dashboard'), 1500);
       } else {
