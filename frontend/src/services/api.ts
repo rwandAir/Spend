@@ -18,17 +18,28 @@ interface RegisterRequest {
   password: string;
 }
 
+// Accepts both the API field names and the UI field names for flexibility
 interface ExpenseRequest {
-  category: string;
+  // UI field names (used by ExpensesPage)
+  category_id?: number;
+  expense_date?: string;
+  // Alternate field names (legacy compatibility)
+  category?: string;
+  date?: string;
   amount: number;
   description?: string;
-  date: string;
+  payment_method?: string;
 }
 
 interface IncomeRequest {
   amount: number;
-  source: string;
-  date: string;
+  // UI field names (used by DashboardPage)
+  description?: string;
+  income_date?: string;
+  payment_method?: string;
+  // Legacy / alternate field names
+  source?: string;
+  date?: string;
 }
 
 interface CategoryRequest {
@@ -116,7 +127,7 @@ export const authService = {
   /**
    * Logout user
    */
-  async logout() {
+  async logout(): Promise<{ success: boolean; error?: string }> {
     try {
       await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
@@ -138,6 +149,22 @@ export const authService = {
       localStorage.removeItem('sw_balance');
       return { success: true };
     }
+  },
+
+  /**
+   * Request a password reset email.
+   * Not yet implemented on the Django backend — returns a not-supported response.
+   */
+  async requestPasswordReset(_email: string): Promise<{ success: boolean; error?: string }> {
+    return { success: false, error: 'Password reset is not yet supported.' };
+  },
+
+  /**
+   * Update password while logged in.
+   * Not yet implemented on the Django backend — returns a not-supported response.
+   */
+  async updatePassword(_newPassword: string): Promise<{ success: boolean; error?: string }> {
+    return { success: false, error: 'Password update is not yet supported.' };
   },
 
   /**
@@ -301,9 +328,14 @@ export const dataService = {
   },
 
   /**
-   * Add new category
+   * Add new category.
+   * Supports both addCategory(data) and addCategory(name, budgetLimit) call signatures.
    */
-  async addCategory(data: CategoryRequest) {
+  async addCategory(nameOrData: string | CategoryRequest, budgetLimit?: number) {
+    const payload: CategoryRequest =
+      typeof nameOrData === 'string'
+        ? { name: nameOrData, budget_limit: budgetLimit }
+        : nameOrData;
     try {
       const response = await fetch(`${API_BASE_URL}/categories/add`, {
         method: 'POST',
@@ -311,7 +343,7 @@ export const dataService = {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {

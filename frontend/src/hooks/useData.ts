@@ -44,7 +44,7 @@ export const useData = () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await dataService.addExpense(expenseData);
+      const result = await dataService.addExpense(expenseData as any);
       return { success: true, data: result };
     } catch (err: any) {
       const errorMsg = err.message || 'Failed to add expense';
@@ -74,7 +74,7 @@ export const useData = () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await dataService.addIncome(incomeData);
+      const result = await dataService.addIncome(incomeData as any);
       return { success: true, data: result };
     } catch (err: any) {
       const errorMsg = err.message || 'Failed to add income';

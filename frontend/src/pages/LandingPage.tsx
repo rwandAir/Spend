@@ -13,7 +13,7 @@ const LandingPage = () => {
           <a href="#features">Features</a>
           <a href="#about">About</a>
           <Link to="/login" className="btn-auth btn-outline">Sign In</Link>
-          <Link to="/login?tab=register" className="btn-auth btn-primary">Get Started</Link>
+          <Link to="/login?tab=register" className="btn-auth btn-primary !text-white">Get Started</Link>
         </div>
       </nav>
 
@@ -55,34 +55,34 @@ const LandingPage = () => {
           <p>Everything you need to manage your money efficiently in one sleek, secure platform.</p>
         </div>
         <div className="feature-grid">
-          <FeatureCard 
-            icon={<Receipt size={24} />} 
-            title="Track Expenses" 
+          <FeatureCard
+            icon={<Receipt size={24} />}
+            title="Track Expenses"
             description="Log every transaction in seconds. Categorize your spending and see exactly where your money goes."
           />
-          <FeatureCard 
-            icon={<Target size={24} />} 
-            title="Smart Budgeting" 
+          <FeatureCard
+            icon={<Target size={24} />}
+            title="Smart Budgeting"
             description="Set monthly limits for different categories. Get notified when you're close to your limit."
           />
-          <FeatureCard 
-            icon={<PieChart size={24} />} 
-            title="Visual Analytics" 
+          <FeatureCard
+            icon={<PieChart size={24} />}
+            title="Visual Analytics"
             description="Beautiful charts and reports help you understand your financial patterns at a glance."
           />
-          <FeatureCard 
-            icon={<Smartphone size={24} />} 
-            title="Mobile Friendly" 
+          <FeatureCard
+            icon={<Smartphone size={24} />}
+            title="Mobile Friendly"
             description="Track your finances on the go. Optimized for all devices, from smartphones to desktops."
           />
-          <FeatureCard 
-            icon={<Shield size={24} />} 
-            title="Secure & Private" 
+          <FeatureCard
+            icon={<Shield size={24} />}
+            title="Secure & Private"
             description="Your data is encrypted and secure. We prioritize your privacy above everything else."
           />
-          <FeatureCard 
-            icon={<FileOutput size={24} />} 
-            title="Export Reports" 
+          <FeatureCard
+            icon={<FileOutput size={24} />}
+            title="Export Reports"
             description="Need your data for accounting? Export detailed PDF or CSV reports with one click."
           />
         </div>
