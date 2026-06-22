@@ -5,7 +5,7 @@
  * Base URL: http://localhost:8000/api (proxied through Vite)
  */
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 interface LoginRequest {
   email: string;
