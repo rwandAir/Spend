@@ -17,3 +17,13 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Python & Django
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+db.sqlite3
+venv/
+.venv/

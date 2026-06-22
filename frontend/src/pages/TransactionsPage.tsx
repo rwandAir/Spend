@@ -12,7 +12,7 @@ const TransactionsPage = () => {
   const fetchTransactions = async () => {
     try {
       const res = await dataService.getTransactions();
-      setTransactions(res);
+      setTransactions(Array.isArray(res.transactions) ? res.transactions : []);
     } catch (error) {
       console.error('Failed to fetch transactions', error);
     } finally {
@@ -76,7 +76,7 @@ const TransactionsPage = () => {
                       </div>
                     </td>
                     <td>
-                      <span className={`badge ${tx.transaction_type}`}>
+                      <span className={`badge badge-${tx.transaction_type === 'income' ? 'success' : 'error'}`}>
                         {tx.transaction_type === 'income' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                         {tx.transaction_type}
                       </span>
@@ -108,25 +108,7 @@ const TransactionsPage = () => {
           padding: 15px 25px;
         }
 
-        .search-box {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          background: var(--bg);
-          padding: 10px 16px;
-          border-radius: 12px;
-          border: 1px solid var(--border);
-        }
 
-        .search-box svg { color: var(--muted); }
-        .search-box input {
-          width: 100%;
-          background: transparent;
-          border: none;
-          font-size: 0.95rem;
-          color: var(--ink);
-        }
 
         .filter-actions { display: flex; gap: 12px; }
         .btn-filter {
@@ -174,19 +156,7 @@ const TransactionsPage = () => {
         .tx-dot.income { background: var(--success); }
         .tx-dot.expense { background: var(--error); }
 
-        .badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 4px 12px;
-          border-radius: 99px;
-          font-size: 0.75rem;
-          font-weight: 700;
-          text-transform: capitalize;
-        }
 
-        .badge.income { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-        .badge.expense { background: rgba(239, 68, 68, 0.1); color: var(--error); }
 
         .text-right { text-align: right; }
         .text-muted { color: var(--muted); }

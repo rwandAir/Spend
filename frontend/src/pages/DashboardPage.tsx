@@ -102,6 +102,7 @@ const DashboardPage = () => {
             <div className="form-group">
               <input 
                 type="number" 
+                className="form-input"
                 placeholder="Amount (RWF)" 
                 value={incomeForm.amount}
                 onChange={(e) => setIncomeForm({ ...incomeForm, amount: e.target.value })}
@@ -111,6 +112,7 @@ const DashboardPage = () => {
             <div className="form-group">
               <input 
                 type="text" 
+                className="form-input"
                 placeholder="Description" 
                 value={incomeForm.description}
                 onChange={(e) => setIncomeForm({ ...incomeForm, description: e.target.value })}
@@ -118,6 +120,7 @@ const DashboardPage = () => {
             </div>
             <div className="form-group">
               <select 
+                className="form-select"
                 value={incomeForm.payment_method}
                 onChange={(e) => setIncomeForm({ ...incomeForm, payment_method: e.target.value })}
               >
@@ -227,13 +230,7 @@ const DashboardPage = () => {
 
         .form-group { flex: 1; min-width: 150px; }
         
-        .horizontal-form input, .horizontal-form select {
-          width: 100%;
-          padding: 12px 16px;
-          border: 1.5px solid var(--border);
-          border-radius: 12px;
-          font-size: 0.9rem;
-        }
+
 
         .transaction-list { display: flex; flex-direction: column; gap: 16px; }
         

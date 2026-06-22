@@ -22,7 +22,7 @@ const ExpensesPage = () => {
   const fetchData = async () => {
     try {
       const cats = await dataService.getCategories();
-      setCategories(cats);
+      setCategories(Array.isArray(cats.categories) ? cats.categories : []);
     } catch (error) {
       console.error('Failed to fetch categories', error);
     } finally {
@@ -76,10 +76,11 @@ const ExpensesPage = () => {
           <form onSubmit={handleAddExpense}>
             <div className="form-grid">
               <div className="form-group">
-                <label>Category</label>
+                <label className="form-label">Category</label>
                 <div className="select-wrap">
                   <Receipt size={18} />
                   <select 
+                    className="form-select"
                     value={formData.category_id} 
                     onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                     required
@@ -93,11 +94,12 @@ const ExpensesPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Amount (RWF)</label>
+                <label className="form-label">Amount (RWF)</label>
                 <div className="input-wrap">
                   <span className="currency-prefix">RWF</span>
                   <input 
                     type="number" 
+                    className="form-input"
                     placeholder="0" 
                     value={formData.amount}
                     onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
@@ -107,11 +109,12 @@ const ExpensesPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Date</label>
+                <label className="form-label">Date</label>
                 <div className="input-wrap">
                   <Calendar size={18} />
                   <input 
                     type="date" 
+                    className="form-input"
                     value={formData.expense_date}
                     onChange={(e) => setFormData({ ...formData, expense_date: e.target.value })}
                   />
@@ -119,10 +122,11 @@ const ExpensesPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Payment Method</label>
+                <label className="form-label">Payment Method</label>
                 <div className="select-wrap">
                   <CreditCard size={18} />
                   <select 
+                    className="form-select"
                     value={formData.payment_method}
                     onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
                   >
@@ -141,7 +145,7 @@ const ExpensesPage = () => {
           </form>
 
           {message && (
-            <div className={`message-alert ${message.type}`}>
+            <div className={`alert alert-${message.type === 'error' ? 'error' : 'success'}`} style={{ marginTop: '24px' }}>
               {message.type === 'error' && <AlertCircle size={18} />}
               <span>{message.text}</span>
             </div>
@@ -190,16 +194,6 @@ const ExpensesPage = () => {
           margin-bottom: 30px;
         }
 
-        .form-group label {
-          display: block;
-          font-size: 0.85rem;
-          font-weight: 700;
-          color: var(--muted);
-          margin-bottom: 10px;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-
         .select-wrap, .input-wrap {
           position: relative;
           display: flex;
@@ -209,7 +203,7 @@ const ExpensesPage = () => {
         .select-wrap svg, .input-wrap svg {
           position: absolute;
           left: 16px;
-          color: #94a3b8;
+          color: var(--subtle);
           pointer-events: none;
         }
 
@@ -217,23 +211,12 @@ const ExpensesPage = () => {
           position: absolute;
           left: 16px;
           font-weight: 700;
-          color: #94a3b8;
+          color: var(--subtle);
           font-size: 0.8rem;
         }
 
-        select, input {
-          width: 100%;
-          padding: 14px 16px 14px 48px;
-          border: 1.5px solid var(--border);
-          border-radius: 14px;
-          font-size: 0.95rem;
-          background: var(--white);
-          transition: all 0.2s;
-        }
-
-        select:focus, input:focus {
-          border-color: var(--blue);
-          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        .form-select, .form-input {
+          padding-left: 48px;
         }
 
         .submit-expense-btn {
@@ -242,18 +225,6 @@ const ExpensesPage = () => {
           justify-content: center;
           font-size: 1rem;
         }
-
-        .message-alert {
-          margin-top: 24px;
-          padding: 14px;
-          border-radius: 14px;
-          font-size: 0.9rem;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-        .message-alert.success { background: #ecfdf5; color: var(--success); border: 1px solid #d1fae5; }
-        .message-alert.error { background: #fef2f2; color: var(--error); border: 1px solid #fee2e2; }
 
         .budget-info-card h3 {
           margin-bottom: 20px;

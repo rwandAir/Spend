@@ -17,7 +17,14 @@ const ReportsPage = () => {
     setLoading(true);
     try {
       const res = await dataService.getReportData(selectedMonth);
-      setData(res);
+      // Backend returns categories as [{category, icon, amount, ...}] objects,
+      // but ReportData.categories expects string[]. Normalize here.
+      const rawCats: any[] = Array.isArray(res.categories) ? res.categories : [];
+      setData({
+        categories: rawCats.map((c: any) => (typeof c === 'string' ? c : c.category ?? '')),
+        amounts: Array.isArray(res.amounts) ? res.amounts : [],
+        colors: Array.isArray(res.colors) ? res.colors : [],
+      });
     } catch (error) {
       console.error('Failed to fetch report', error);
     } finally {
@@ -71,7 +78,7 @@ const ReportsPage = () => {
   return (
     <Layout title="Financial Analytics">
       <div className="reports-header card">
-        <div className="month-picker">
+        <div className="search-box month-picker">
           <Calendar size={20} />
           <input 
             type="month" 
@@ -133,17 +140,7 @@ const ReportsPage = () => {
           padding: 15px 25px;
         }
 
-        .month-picker {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          background: var(--bg);
-          padding: 10px 16px;
-          border-radius: 12px;
-          border: 1px solid var(--border);
-        }
-        .month-picker input { border: none; background: transparent; font-weight: 700; color: var(--ink); }
-        .month-picker svg { color: var(--blue); }
+        .month-picker input { font-weight: 700; cursor: pointer; }
 
         .reports-grid {
           display: grid;

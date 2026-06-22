@@ -14,7 +14,21 @@ const BudgetPage = () => {
   const fetchBudgets = async () => {
     try {
       const res = await dataService.getBudgetData();
-      setBudgets(res);
+      // Backend returns { categories: [{id, name, icon, budget, spent}], ... }
+      const raw: any[] = Array.isArray(res.categories) ? res.categories : [];
+      const mapped: Budget[] = raw.map((c) => {
+        const limit = Number(c.budget) || 0;
+        const spent = Number(c.spent) || 0;
+        return {
+          category_id: c.id,
+          category_name: c.name,
+          budget_limit: limit,
+          total_spent: spent,
+          remaining: limit - spent,
+          percentage_used: limit > 0 ? Math.round((spent / limit) * 100) : 0,
+        };
+      });
+      setBudgets(mapped);
     } catch (error) {
       console.error('Failed to fetch budget data', error);
     } finally {
@@ -48,7 +62,7 @@ const BudgetPage = () => {
   return (
     <Layout title="Budget Management">
       <div className="budget-header-actions">
-        <div className="budget-search">
+        <div className="search-box budget-search">
           <Search size={18} />
           <input type="text" placeholder="Filter categories..." />
         </div>
@@ -73,20 +87,22 @@ const BudgetPage = () => {
             <h3>Add New Category</h3>
             <p className="modal-sub">Create a new spending category and set its monthly limit.</p>
             <form onSubmit={handleAddCategory}>
-              <div className="form-field">
-                <label>Category Name</label>
+              <div className="form-field" style={{ marginBottom: '20px' }}>
+                <label className="form-label">Category Name</label>
                 <input 
                   type="text" 
+                  className="form-input"
                   placeholder="e.g., Entertainment, Gym" 
                   value={newCat.name}
                   onChange={(e) => setNewCat({ ...newCat, name: e.target.value })}
                   required 
                 />
               </div>
-              <div className="form-field">
-                <label>Monthly Limit (RWF)</label>
+              <div className="form-field" style={{ marginBottom: '20px' }}>
+                <label className="form-label">Monthly Limit (RWF)</label>
                 <input 
                   type="number" 
+                  className="form-input"
                   placeholder="e.g., 50000" 
                   value={newCat.limit}
                   onChange={(e) => setNewCat({ ...newCat, limit: e.target.value })}
@@ -114,18 +130,8 @@ const BudgetPage = () => {
         }
 
         .budget-search {
-          flex: 1;
           max-width: 400px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          background: var(--white);
-          padding: 12px 16px;
-          border-radius: 14px;
-          border: 1px solid var(--border);
         }
-        .budget-search input { border: none; width: 100%; font-size: 0.9rem; }
-        .budget-search svg { color: var(--muted); }
 
         .budget-grid {
           display: grid;
@@ -203,8 +209,7 @@ const BudgetPage = () => {
         .modal-sub { color: var(--muted); font-size: 0.9rem; margin: 8px 0 24px; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; }
         
-        .btn-ghost { color: var(--muted); }
-        .btn-ghost:hover { background: var(--bg); color: var(--ink); }
+
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes scaleUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }

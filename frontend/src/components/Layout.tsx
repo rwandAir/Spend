@@ -37,17 +37,20 @@ const Layout = ({ children, title }: LayoutProps) => {
           min-height: 100vh;
           display: flex;
           flex-direction: column;
+          background: #f8fafc;
         }
         
         .layout-body {
           display: flex;
           flex: 1;
+          min-height: 0;
         }
         
         .main-content {
           flex: 1;
-          padding: 30px;
+          padding: clamp(20px, 4vw, 36px) clamp(16px, 4vw, 36px);
           overflow-y: auto;
+          min-width: 0;
         }
         
         .content-container {
@@ -56,13 +59,16 @@ const Layout = ({ children, title }: LayoutProps) => {
         }
         
         .page-title {
-          font-size: 1.8rem;
-          margin-bottom: 30px;
-          color: var(--ink);
+          font-size: clamp(1.4rem, 3vw, 1.9rem);
+          margin-bottom: 28px;
+          color: #0f172a;
+          font-family: 'Sora', sans-serif;
+          font-weight: 800;
+          letter-spacing: -0.02em;
         }
 
-        @media (max-width: 768px) {
-          .main-content { padding: 20px; }
+        @media (max-width: 767px) {
+          .page-title { margin-bottom: 20px; }
         }
       `}</style>
     </div>

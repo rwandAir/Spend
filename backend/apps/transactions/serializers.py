@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Transaction
 
 class TransactionSerializer(serializers.ModelSerializer):
-    transaction_id = serializers.ReadOnlyField(source='transaction_id')
+    transaction_id = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField(source='transaction_id')
     transaction_date = serializers.SerializerMethodField()
     type = serializers.ReadOnlyField(source='transaction_type')
