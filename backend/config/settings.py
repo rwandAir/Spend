@@ -150,12 +150,12 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://localhost:5175').split(',')
-CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS]
+CORS_ALLOWED_ORIGINS = [origin.strip().rstrip('/') for origin in CORS_ALLOWED_ORIGINS]
 CORS_ALLOW_CREDENTIALS = True
 
 # CSRF settings - Trust frontend origins for CSRF token validation
 CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://localhost:5175').split(',')
-CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS]
+CSRF_TRUSTED_ORIGINS = [origin.strip().rstrip('/') for origin in CSRF_TRUSTED_ORIGINS]
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to access CSRF cookie
 
 # Internationalization
